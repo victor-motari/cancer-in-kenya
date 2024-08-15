@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CANCER CASES IN KENYA</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: calc(100vh - 50px); /* Adjust height to account for title */
+            width: 100%;
+        }
+        #title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="title">CANCER CASES IN KENYA</div>
+    <div id="map"></div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- Map and Data Script -->
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([1.2921, 36.8219], 6); // Centered on Kenya
+
+        // Add a tile layer (background map)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Hypothetical cancer distribution data
+        var cancerData = [
+            { "lat": -1.2921, "lng": 36.8219, "cases": 500 }, // Nairobi
+            { "lat": -4.0435, "lng": 39.6682, "cases": 300 }, // Mombasa
+            { "lat": -0.0917, "lng": 34.7680, "cases": 250 }, // Kisumu
+            { "lat": -0.5950, "lng": 35.2830, "cases": 200 }, // Nakuru
+            { "lat": 0.5118, "lng": 35.2693, "cases": 180 }, // Eldoret
+            { "lat": -0.4565, "lng": 39.6647, "cases": 150 }, // Garissa
+            { "lat": 3.4055, "lng": 35.6072, "cases": 120 }  // Turkana
+        ];
+
+        // Normalize cancer cases for radius scaling
+        function normalizeCases(cases, minCases, maxCases) {
+            return (cases - minCases) / (maxCases - minCases);
+        }
+
+        // Find min and max number of cases
+        var casesArray = cancerData.map(function(point) { return point.cases; });
+        var minCases = Math.min.apply(null, casesArray);
+        var maxCases = Math.max.apply(null, casesArray);
+
+        // Define maximum radius in meters
+        var maxRadius = 50000; // Maximum radius in meters (for the highest number of cases)
+
+        // Add circles to the map with proportional radius
+        cancerData.forEach(function(point) {
+            var normalized = normalizeCases(point.cases, minCases, maxCases);
+            var radius = normalized * maxRadius;
+
+            L.circle([point.lat, point.lng], {
+                radius: radius,
+                fillColor: '#ff7800',
+                color: '#000',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map)
+                .bindPopup('Cancer Cases: ' + point.cases);
+        });
+    </script>
+</body>
+</html>
